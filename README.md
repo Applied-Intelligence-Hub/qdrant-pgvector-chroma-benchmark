@@ -1,4 +1,3 @@
-# qdrant-pgvector-chroma-benchmark
 # Qdrant vs pgvector vs ChromaDB Benchmark
 
 ![Experimental Architecture](docs/architecture_diagram.png)
