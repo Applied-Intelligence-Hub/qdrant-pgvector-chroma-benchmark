@@ -113,4 +113,4 @@ python3 scripts/analise_estatistica.py
 
 ## Citation
 If you use this benchmark data or methodology in your research, please refer to the original thesis:
-> Caneira, F. D. M. M. (2026). *Análise Comparativa de SGBDV: Benchmark Experimental entre Qdrant, pgvector e ChromaDB.* IPSantarém. 
+> Caneira, F. D. M. M. (2026). *Análise Comparativa de SGBDV: Benchmark Experimental entre Qdrant, pgvector e ChromaDB.* IPSantarém.
