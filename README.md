@@ -1,7 +1,6 @@
 # Qdrant vs pgvector vs ChromaDB Benchmark
 
 ![Experimental Architecture](docs/architecture_diagram.png)
-*(Note: Replace `docs/architecture_diagram.png` with the actual exported image of your Docker architecture from Figure 3.1 in the thesis)*
 
 ## Overview
 This repository contains the experimental benchmarking code and data from the Master's thesis **"Análise Comparativa de SGBDV: Benchmark Experimental entre Qdrant, pgvector e ChromaDB"** (Francisco Caneira, IP Santarém, 2026). 
