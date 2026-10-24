@@ -1,0 +1,2 @@
+DB,Metric,Segments_MB,Vetores_RocksDB_MB,Grafo_HNSW_MB,Restante_segmentos_MB,WAL_MB,Outros_MB,Total_MB,Total_sem_WAL_MB,Vetores_brutos_MB,Rácio_compressão,Espera_indexacao_s
+Qdrant,COSINE,463.24,352.01,110.68,0.54,96.0,0.01,559.25,463.25,488.28,0.721,245

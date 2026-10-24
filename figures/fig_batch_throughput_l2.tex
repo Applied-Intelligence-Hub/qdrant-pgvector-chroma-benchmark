@@ -1,0 +1,37 @@
+\begin{figure}[H]
+\centering
+\begin{tikzpicture}
+\begin{axis}[
+    width=0.85\textwidth,
+    height=0.42\textwidth,
+    xlabel={Tamanho do lote},
+    ylabel={Débito (vec/s)},
+    xmode=log,
+    log basis x={10},
+    xmin=50, xmax=100000,
+    ymin=0, ymax=7000,
+    legend columns=3,
+    legend style={at={(0.5,1.03)}, anchor=south, font=\small, draw=none, /tikz/column sep=6pt},
+    /pgf/number format/1000 sep={\,},
+    grid=major,
+    grid style={dashed, gray!25},
+    thick,
+    mark options={solid}
+]
+\addplot[color=blue, mark=*] coordinates {
+    (100, 4691) (1000, 5730) (10000, 5797) (50000, 6136)
+};
+\addlegendentry{Qdrant}
+\addplot[color=green!70!black, mark=triangle*] coordinates {
+    (100, 1734) (1000, 3169) (10000, 4435) (50000, 4507)
+};
+\addlegendentry{ChromaDB}
+\addplot[color=red, mark=square*] coordinates {
+    (100, 2924) (1000, 3021) (10000, 3029) (50000, 3036)
+};
+\addlegendentry{pgvector}
+\end{axis}
+\end{tikzpicture}
+\caption{Débito de inserção em lote para a \textbf{Métrica L2}, medido até a coleção estar pronta a pesquisar (mediana de 3 réplicas). Nos lotes acima de \num{10000} (Qdrant) e de \num{5461} (ChromaDB), os vetores são enviados em pedidos de tamanho máximo.}
+\label{fig:batch_throughput_l2}
+\end{figure}

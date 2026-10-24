@@ -1,0 +1,2 @@
+DB,Metric,Indice_HNSW_MB,SQLite_MB,WAL_MB,Outros_MB,Total_MB,Total_sem_WAL_MB,Vetores_brutos_MB
+ChromaDB,L2,663.62,131.88,0.0,0.0,795.5,795.5,488.28

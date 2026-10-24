@@ -1,0 +1,13 @@
+DB,Metric,Batch_Size,Pedido_efetivo,Replica,Ingestao_s,Indexacao_s,Total_s,Throughput_vec_s
+pgvector,Cosine,100,100,1,13.151,27.517,40.668,2459.0
+pgvector,Cosine,100,100,2,12.664,27.508,40.171,2489.3
+pgvector,Cosine,100,100,3,12.702,27.464,40.166,2489.7
+pgvector,Cosine,1000,1000,1,11.859,27.475,39.335,2542.3
+pgvector,Cosine,1000,1000,2,11.835,27.464,39.3,2544.6
+pgvector,Cosine,1000,1000,3,11.935,27.462,39.397,2538.3
+pgvector,Cosine,10000,10000,1,11.757,27.458,39.215,2550.1
+pgvector,Cosine,10000,10000,2,11.709,27.451,39.16,2553.6
+pgvector,Cosine,10000,10000,3,11.712,27.47,39.181,2552.2
+pgvector,Cosine,50000,50000,1,12.011,27.438,39.449,2534.9
+pgvector,Cosine,50000,50000,2,12.001,27.496,39.496,2531.9
+pgvector,Cosine,50000,50000,3,11.993,27.447,39.44,2535.5
