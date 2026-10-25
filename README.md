@@ -64,7 +64,15 @@ To reproduce these experiments in isolated environments (as designed in the thes
 * **OS:** Linux (Ubuntu Server 24.04 LTS recommended)
 * **Docker Engine:** `docker-ce 29.3.0` or equivalent (with `cgroups v2` support for resource limiting)
 * **Python:** Version 3.12+
-* **Hardware Requirements:** At least 4 physical CPU cores and 16GB of RAM (Docker containers are strictly limited to 8GB RAM each via `mem_limit`).
+* **Hardware:** It was used an Intel Core i5-7400 (4 physical CPU cores) with 16GB of RAM. Each container is limited to a quota of 4 CPUs (`cpus: 4`) and 8 Gib of RAM without swap (`mem_limit` and `memswap_limit`). The benchmark client runs on the same host and shares its cores
+*  **CPU governor:** All final experiments used the `performance` governor (this setting is lost on reboot):
+  ```bash
+  echo performance | sudo tee /sys/devices/system/cpu/cpu*/cpufreq/scaling_governor
+  ```
+* **Passwordless `sudo` for clearing the page cache**, used by the RAM profiling and cold start experiments (the cold start scripts stop if they cannot clear it). Open the sudoers file with `sudo visudo` and add, replacing `<user>` with your user name:
+  ```
+  <user> ALL=(ALL) NOPASSWD: /bin/sh -c echo 3 > /proc/sys/vm/drop_caches
+  ```
 
 ## Setup and Installation
 
@@ -92,7 +100,7 @@ sudo usermod -aG docker $USER
 newgrp docker
 ```
 ### 2. Start the Docker Containers
-The repository includes configurations to run each database in total isolation. Swap must be disabled on the host to enforce strict memory limits.
+The repository includes the configuration of each database, as listed in Appendix A of the thesis. Each engine runs in its own container, limited to a quota of 4 CPUs and 8 GiB of RAM. Setting `memswap_limit` equal to `mem_limit` prevents the containers from using swap, so a container that exceeds its memory limit fails instead of paging to disk. The CPU quota does not reserve cores. The containers share the host's 4 cores with the operating system and the benchmark client.
 
 ```bash
 # Start Qdrant
@@ -105,15 +113,28 @@ docker compose -f docker/pgvector-compose.yml up -d
 docker compose -f docker/chromadb-compose.yml up -d
 ```
 
+Starting the files from the `docker/` folder creates the volumes `docker_qdrant_data`, `docker_pgvector_data` and `docker_chromadb_data` (Docker Compose names volumes `<folder>_<volume>`). These are the names used by `monitorizar_ram.py` and by the commands below; if you start the containers from another folder, check the names with `docker volume ls`.
+
+Check that the services are running and that the limits are applied:
+
+```bash
+docker ps
+docker inspect qdrant | grep -i memory
+docker inspect pgvector | grep -i memory
+docker inspect chromadb | grep -i memory
+```
+
 ### 3. Install Python Dependencies
 Set up your virtual environment and install the required official clients and analysis libraries (e.g., `qdrant-client`, `psycopg2`, `chromadb`, `scipy`, `pandas`):
 
 ```bash
+sudo apt install python3-venv python3-full -y
 python3 -m venv vdb-env
 source vdb-env/bin/activate
+pip install --upgrade pip
 pip install -r requirements.txt
 ```
-
+This installs the official clients and analysis libraries (`qdrant-client`, `psycopg2`, `pgvector`, `chromadb`, `numpy`, `scipy`, `docker`, `tqdm`).
 ### 4. Download the Dataset
 You need to download the **SIFT1M dataset** and place it in the `data/` directory.
 
@@ -122,58 +143,144 @@ mkdir data
 # Download SIFT1M base vectors, query vectors, and ground truth files here
 ```
 
+### 4. Download and Prepare the SIFT1M Dataset
+Download the dataset from the [INRIA TEXMEX corpus](http://corpus-texmex.irisa.fr/) and prepare it with four scripts, run in this order:
+
+```bash
+wget ftp://ftp.irisa.fr/local/texmex/corpus/sift.tar.gz
+tar -xvzf sift.tar.gz                       # creates sift/ with the .fvecs and .ivecs files
+
+python3 scripts/converter_sift.py             # .fvecs/.ivecs -> sift/sift_base.npy, sift_query.npy, sift_gt.npy
+python3 scripts/gerar_subconjuntos.py         # the first N vectors -> sift/subsets/sift_base_<N>.npy
+python3 scripts/gerar_ground_truth_l2.py      # exact neighbours (L2) -> sift/gt/gt_<N>.npy
+python3 scripts/gerar_ground_truth_cosseno.py # exact neighbours (Cosine) -> sift/gt_cosine/gt_<N>.npy
+```
+
+Or run everything at once (download, extraction, the four scripts and a final check of the files):
+
+```bash
+python3 scripts/preparar_dados.py
+```
+
+This creates the structure that every experiment script expects, relative to the repository root:
+
+```
+sift/sift_query.npy                  10,000 query vectors
+sift/subsets/sift_base_<N>.npy       the first N base vectors, N = 100, 1000, 10000, 100000, 1000000
+sift/gt/gt_<N>.npy                   the 10 nearest neighbours (L2) of each query in each subset
+sift/gt_cosine/gt_<N>.npy            the same for the Cosine similarity
+```
+
+The subsets are deterministic (the first N vectors). SIFT1M only provides the ground truth of the full dataset in L2, so `gerar_ground_truth_l2.py` (L2) and `gerar_ground_truth_cosseno.py` (Cosine) compute the ground truth of every subset by exact search. See [`docs/DATASET.md`](docs/DATASET.md) for the details. The `sift/` folder is not versioned.
+
 ## How to Run the Benchmarks
 
-The benchmark suite is entirely orchestrated using Python. Run the scripts sequentially from the terminal. 
+The benchmark suite is entirely orchestrated using Python. Run the scripts sequentially from the **repository root**. Every experiment script takes `--metric l2` or `--metric cosine`, and writes its CSV files to the current folder; the final versions of those files are stored in `results/`.
+
+There is no central orchestrator: each script is run individually, for each engine and metric, in the order below. Before each experiment, make sure the engines contain only what the experiment expects. To empty ChromaDB (whose server does not delete the index files of dropped collections):
+
+```bash
+docker stop chromadb && docker run --rm -v docker_chromadb_data:/volume busybox sh -c "rm -rf /volume/*" && docker start chromadb
+```
 
 ### Step 1: Data Ingestion (Preparation)
-Before running performance metrics, ingest the 1 million vectors into the respective engines.
+Ingest the 1 million vectors into each engine while `scripts/monitorizar_ram.py` records the container's memory. The monitor restarts the container, waits for the service, runs the insertion script given in `--cmd` and samples `docker stats` (about every 3 s) until it ends. The option `--clean` empties the container's volume first, so that the recording starts from a clean state.
 
 ```bash
-python3 scripts/ram_inserir_qdrant.py
-python3 scripts/ram_inserir_pgvector.py
-python3 scripts/ram_inserir_chromadb.py
+sync; sudo sh -c 'echo 3 > /proc/sys/vm/drop_caches'
+python3 scripts/monitorizar_ram.py --container qdrant --output ram_qdrant_l2.csv --clean \
+        --cmd "python3 scripts/ram_inserir_qdrant.py --metric l2"
 ```
+Repeat for `pgvector` and `chromadb`, and for `--metric cosine`. The insertion scripts also create the `disk_test_<metric>` collections used by Steps 4, 7 and 8.
+
 
 ### Step 2: Base Performance Benchmarking
-These scripts execute 10,000 queries to measure baseline Latency (p50, p95, p99), Throughput (QPS), and Recall@10.
+These scripts execute 10 replicas at five scales (100 to 1M vectors), with 10,000 queries per scale, measuring indexing time, latency (p50, p95, p99), throughput (QPS), RAM and Recall@10. Each replica restarts the container.
 
 ```bash
-python3 scripts/bench_qdrant.py
-python3 scripts/bench_pgvector.py
-python3 scripts/bench_chromadb.py
+python3 scripts/benchmark_base_qdrant.py --metric l2
+python3 scripts/benchmark_base_pgvector.py --metric l2
+python3 scripts/benchmark_base_chromadb.py --metric l2
 ```
 
+In Qdrant, indexing is disabled during the upload and enabled afterwards with a 1 KB threshold, so that the HNSW index is built at every scale (with the default 20,000 KB threshold, collections of up to 100,000 vectors are searched exhaustively).
+
 ### Step 3: Parameter Optimization
-To map the efficiency surfaces and find the Pareto optimal configurations for `m` and `ef_search` (maintaining `ef_construction=200`):
+To map the efficiency surfaces and find the Pareto optimal configurations for `m`  ∈ {16, 24, 32} and `ef_search` ∈ {64, 128, 256} (maintaining `ef_construction=200`). Each configuration is measured once, with 1,000 queries.
 
 ```bash
-python3 scripts/otimizacao_qdrant.py
-python3 scripts/otimizacao_pgvector.py
-python3 scripts/otimizacao_chromadb.py
+python3 scripts/otimizacao_qdrant.py --metric l2
+python3 scripts/otimizacao_pgvector.py --metric l2
+python3 scripts/otimizacao_chromadb.py --metric l2
 ```
 
 ### Step 4: Complementary Scenarios
-Test specific production scenarios like concurrency scaling, batch ingestion limits, and physical disk usage:
+Test specific production scenarios. Each script exists for the three engines (`qdrant`, `pgvector`, `chromadb`):
 
-* **Concurrency Scaling (1 to 32 threads):** `python3 scripts/escalabilidade_qdrant.py`
-* **Batch Ingestion:** `python3 scripts/lote_inserir_pgvector.py`
-* **Cold Start vs. Warm Cache:** `python3 scripts/cold_warm_chromadb.py`
-* **Disk Usage Analytics:** `python3 scripts/disco_qdrant.py`
+* **Disk Usage:** `python3 scripts/disco_qdrant.py --metric l2`. `disco_chromadb.py` requires an empty ChromaDB instance and also records the size of each index file. `disco_pgvector.py` must run **after** Step 1: it recreates the `disk_test_<metric>` tables with ids starting at 0, as in the ground truth files.
+* **Detailed Latency:** `python3 scripts/latencia_qdrant.py --metric l2` (5 replicas × 10,000 queries).
+* **Batch Ingestion:** `python3 scripts/lote_inserir_qdrant.py --metric l2` (100,000 vectors, batches of 100 to 50,000, 3 replicas).
+* **Cold Start vs. Warm Cache:** `python3 scripts/arranque_frio_qdrant.py --metric l2` (10 replicas). In Qdrant, keep only the collection being measured, because Qdrant loads every collection at startup.
+* **Concurrency Scaling (1 to 32 client processes):** `python3 scripts/escalabilidade_qdrant.py --metric l2` (3 replicas). Qdrant is queried through direct HTTP requests, because `qdrant-client` 1.9.2 limited the throughput; `escalabilidade_chromadb_http.py` measures ChromaDB in the same way.
 
-### Step 5: Statistical Analysis
-Once the CSV results are generated, run the statistical analysis script to calculate Welch's t-test, Mann-Whitney U, and Shapiro-Wilk validations across the runs:
+### Step 5: Diagnostics
+The diagnostic scripts support specific statements of the thesis:
 
 ```bash
-python3 scripts/analise_estatistica.py
+python3 scripts/diagnostico_qdrant.py --metric l2        # qdrant-client vs. direct HTTP vs. server time
+python3 scripts/diagnostico_pgvector.py --metric l2      # pgvector server time (EXPLAIN ANALYZE)
+python3 scripts/diagnostico_serializacao_pgvector.py     # size and preparation time of the vectors sent by pgvector
+python3 scripts/diagnostico_concorrencia.py              # threads vs. processes, qdrant-client vs. HTTP
 ```
+
+### Step 6: Statistical Analysis and Figures
+Once the CSV results are generated, run the statistical analysis script on the base benchmark results. It computes the medians of the replicas and compares the engines with the exact Mann-Whitney U test, with Holm's correction for multiple comparisons, Cliff's delta and the Hodges-Lehmann estimator:
+
+```bash
+python3 scripts/analise_estatistica.py results/benchmark_base   # folder with the six results_*.csv files
+python3 scripts/gerar_figuras.py --dados results --saida figures
+```
+`gerar_figuras.py` writes the LaTeX (pgfplots) code of the ten figures of Chapter 4, included in the thesis with `\input{figures/<name>.tex}`.
+
+Figures 2.1 (exact vs. approximate search) and 2.3 (Euclidean distance and cosine similarity) are drawn with Matplotlib and saved to `images/`:
+
+```bash
+python3 scripts/gerar_figura_pesquisa.py
+python3 scripts/gerar_figura_metricas.py
+```
+### Limitations of the results
+These limitations are discussed in Section 5.5 of the thesis. They define the conditions under which the results above are valid.
+
+* **Scope of the evaluation:** 128-dimensional vectors (SIFT1M), up to 1 million vectors, a single server and read-only workloads. Embeddings from current language models have 768 to 1,536 dimensions, where index size, distance cost and compression behave differently. Distributed deployments and mixed read/write workloads were not evaluated.
+* **pgvector with PostgreSQL's default configuration:** `shared_buffers` is 128 MB, so the table and the index (about 1.3 GiB at 1M vectors) do not fit in PostgreSQL's cache. The results for pgvector (indexing time, latency at 1M vectors and cold start) apply to this configuration and may change with tuning.
+* **Latency includes the client:** latencies are measured in the Python client and include each engine's client library and the transport. The benchmark client runs on the same host and shares its 4 cores with the engines. The server-side time was measured for Qdrant and pgvector (Section 4.1.2), but not for ChromaDB.
+* **Client libraries matter:** `qdrant-client` 1.9.2 showed a slower latency level for part of the queries and limited the throughput under concurrency to a little over half of what the same server reaches with direct HTTP requests. Qdrant was therefore queried through direct HTTP requests in the concurrency experiments; ChromaDB was measured both ways.
+* **Memory figures exclude the page cache:** RAM values come from `docker stats` and the cgroup statistics, which exclude the operating system's file cache. This favours pgvector, which serves its queries from that cache.
+* **Single runs:** RAM profiling, parameter optimization and disk usage are single runs (disk usage of Qdrant: three runs). Small differences in these experiments, such as optimization choices that differ by 0.01 to 0.05 percentage points of recall, should be read as indicative.
+* **Engine versions:** Qdrant 1.9.4 (2024) is older than the pgvector (0.8.1) and ChromaDB (1.5.5) versions evaluated. Later versions of Qdrant and of its client may perform differently.
+* **Two campaigns:** the experiments were run in two campaigns. Only the final one (with the `performance` CPU governor and the corrected protocols) is reported in the thesis and included in this repository.
+
+### Practical notes for reproduction
+Issues found while running the experiments, which affect anyone repeating them:
+
+* **ChromaDB does not delete the index files of dropped collections.** They accumulate in the volume (up to several tens of gigabytes during the thesis) and change disk and memory measurements. Empty the volume before each experiment (see *How to Run the Benchmarks*).
+* **ChromaDB must be restarted between replicas.** Without a restart, the memory of dropped collections is not released and the idle value keeps rising.
+* **Qdrant only indexes segments larger than `indexing_threshold`** (20,000 KB by default, about 40,000 vectors per segment). Collections of up to 100,000 vectors are otherwise searched exhaustively, without HNSW. The scripts lower the threshold so that the index is always built.
+* **Qdrant loads every collection at startup.** Keep only the collection being measured in the cold start experiment.
+* **pgvector needs the operator class of the metric** (`vector_l2_ops` or `vector_cosine_ops`); otherwise PostgreSQL ignores the HNSW index and runs a sequential scan. The scripts check the query plan before measuring.
+* **pgvector ids must start at 0,** as in the ground truth files. Run `disco_pgvector.py` after the RAM profiling scripts, which create tables with ids starting at 1.
+* **The client-side preparation of the vectors matters in pgvector:** normalised vectors (Cosine) produce text 3.6 times larger than the integer SIFT values (L2), which explains most of the slower Cosine ingestion (Section 4.1.5).
+* **Use the `performance` CPU governor.** The throughput of ChromaDB with batches of 100 vectors was about 40% higher with `performance` than with `powersave` (1,734 vs. 1,240 vec/s), the largest difference observed between the two modes.
+* **Startup time has a resolution of about 0.1 s,** because the scripts check every 0.1 s whether the engine is ready. For the same reason, Qdrant's index time of 0.41 s at 100 and 1,000 vectors does not measure the index build.
+* **Volume names depend on the folder** from which Docker Compose is started (`<folder>_<volume>`). Check them with `docker volume ls` if you start the containers from somewhere other than `docker/`.
 
 ## Repository Structure
 
 * `docker/`: Docker Compose files ensuring hardware parity (4 CPUs, 8GB RAM).
-* `scripts/`: All Python orchestration scripts (Ingestion, Benchmarking, Profiling).
-* `results/`: Output CSV files containing the raw telemetry and execution times.
-* `docs/`: Supplementary documentation and architecture diagrams.
+* `scripts/`: All Python scripts (dataset preparation, ingestion, benchmarking, profiling, diagnostics, analysis and figures).
+* `results/`: Final CSV files, one folder per experiment (`benchmark_base`, `latency`, `ram_profiling`, `optimization`, `batch_insertion`, `cold_warm`, `disk`, `concurrency`). [`results/README.md`](results/README.md) explains every column and the thesis table or figure each file is used in.
+* `figures/`: Latex code of the Chapter 4 figures, generated from `results/`.
+* `docs/`: Dataset preparation notes and architecture diagrams.
 
 ## Citation
 If you use this benchmark data or methodology in your research, please refer to the original thesis:
