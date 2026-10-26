@@ -1,6 +1,6 @@
 # Resultados: dicionário de dados
 
-[English](README.md) | **Português**
+[English](results_README.md) | **Português**
 
 Ficheiros CSV finais da tese, numa pasta por ensaio. Todos os valores do Capítulo 4 vêm destes ficheiros.
 Os nomes dos ficheiros e das colunas estão em português ou em inglês, tal como os scripts os escrevem; esta página explica cada coluna e a sua unidade.
