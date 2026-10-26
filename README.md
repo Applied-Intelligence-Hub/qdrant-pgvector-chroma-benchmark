@@ -276,7 +276,7 @@ Issues found while running the experiments, which affect anyone repeating them:
 
 * `docker/`: Docker Compose files ensuring hardware parity (4 CPUs, 8 GiB RAM).
 * `scripts/`: All Python scripts (dataset preparation, ingestion, benchmarking, profiling, diagnostics, analysis and figures).
-* `results/`: Final CSV files, one folder per experiment (`benchmark_base`, `latency`, `ram_profiling`, `optimization`, `batch_insertion`, `cold_warm`, `disk`, `concurrency`). [`results/results_README.md`](results/results_README.md) explains every column and the thesis table or figure each file is used in.
+* `results/`: Final CSV files, one folder per experiment (`benchmark_base`, `latency`, `ram_profiling`, `optimization`, `batch_insertion`, `cold_warm`, `disk`, `concurrency`). [`results/README.md`](results/README.md) explains every column and the thesis table or figure each file is used in.
 * `figures/`: LaTeX code of the Chapter 4 figures, generated from `results/`.
 * `docs/`: Dataset preparation notes and the architecture diagram.
 

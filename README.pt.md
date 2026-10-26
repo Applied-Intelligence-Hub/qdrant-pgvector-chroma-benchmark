@@ -280,7 +280,7 @@ Problemas encontrados ao longo dos ensaios, que afetam quem os repetir:
 
 * `docker/`: os ficheiros Docker Compose, que garantem a paridade de *hardware* (4 CPUs, 8 GiB de RAM).
 * `scripts/`: todos os scripts Python (preparação do dataset, inserção, *benchmarking*, monitorização, diagnósticos, análise e figuras).
-* `results/`: os CSV finais, numa pasta por ensaio (`benchmark_base`, `latency`, `ram_profiling`, `optimization`, `batch_insertion`, `cold_warm`, `disk`, `concurrency`). O ficheiro [`results/results_README.pt.md`](results/results_README.pt.md) explica cada coluna e a tabela ou figura da tese em que cada ficheiro é usado.
+* `results/`: os CSV finais, numa pasta por ensaio (`benchmark_base`, `latency`, `ram_profiling`, `optimization`, `batch_insertion`, `cold_warm`, `disk`, `concurrency`). O ficheiro [`results/README.pt.md`](results/README.pt.md) explica cada coluna e a tabela ou figura da tese em que cada ficheiro é usado.
 * `figures/`: o código LaTeX das figuras do Capítulo 4, gerado a partir de `results/`.
 * `docs/`: as notas sobre a preparação do dataset e o diagrama da arquitetura.
 
