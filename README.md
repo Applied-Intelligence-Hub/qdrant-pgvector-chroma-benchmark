@@ -1,5 +1,7 @@
 # Qdrant vs pgvector vs ChromaDB Benchmark
 
+**English** | [Português](README.pt.md)
+
 ![Experimental Architecture](docs/architecture_diagram.png)
 
 ## Overview
@@ -65,7 +67,7 @@ See Chapter 4 and the decision matrix in Chapter 5 of the thesis for the full an
 To reproduce these experiments in isolated environments (as designed in the thesis), you will need:
 * **OS:** Linux (Ubuntu Server 24.04 LTS recommended)
 * **Docker Engine:** `docker-ce 29.3.0` or equivalent (with `cgroups v2` support for resource limiting)
-* **Python:** Version 3.12+
+* **Python:** Version 3.12
 * **Hardware:** The thesis used an Intel Core i5-7400 (4 physical CPU cores) with 16 GiB of RAM. Each container is limited to a quota of 4 CPUs (`cpus: 4`) and 8 GiB of RAM without swap (`mem_limit` and `memswap_limit`). The benchmark client runs on the same host and shares its cores
 * **CPU governor:** All final experiments used the `performance` governor (this setting is lost on reboot):
   ```bash
@@ -177,7 +179,7 @@ There is no central orchestrator: each script is run individually, for each engi
 docker stop chromadb && docker run --rm -v docker_chromadb_data:/volume busybox sh -c "rm -rf /volume/*" && docker start chromadb
 ```
 
-### Step 1: Data Ingestion (Preparation)
+### Step 1: Data Ingestion and RAM Profiling
 Ingest the 1 million vectors into each engine while `scripts/monitorizar_ram.py` records the container's memory. The monitor restarts the container, waits for the service, runs the insertion script given in `--cmd` and samples `docker stats` (about every 3 s) until it ends. The option `--clean` empties the container's volume first, so that the recording starts from a clean state.
 
 ```bash
@@ -268,7 +270,7 @@ Issues found while running the experiments, which affect anyone repeating them:
 * **The client-side preparation of the vectors matters in pgvector:** normalised vectors (Cosine) produce text 3.6 times larger than the integer SIFT values (L2), which explains most of the slower Cosine ingestion (Section 4.1.5).
 * **Use the `performance` CPU governor.** The throughput of ChromaDB with batches of 100 vectors was about 40% higher with `performance` than with `powersave` (1,734 vs. 1,240 vec/s), the largest difference observed between the two modes.
 * **Startup time has a resolution of about 0.1 s,** because the scripts check every 0.1 s whether the engine is ready. For the same reason, Qdrant's index time of 0.41 s at 100 and 1,000 vectors does not measure the index build.
-* **Volume names depend on the folder** from which Docker Compose is started (`<folder>_<volume>`). Check them with `docker volume ls` if you start the containers from somewhere other than `docker/`.
+* **Volume names depend on the folder that contains the compose files** (`<folder>_<volume>`). Check them with `docker volume ls` if the compose files are in a folder other than `docker/`.
 
 ## Repository Structure
 
