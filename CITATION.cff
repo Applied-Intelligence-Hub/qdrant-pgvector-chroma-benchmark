@@ -1,0 +1,19 @@
+cff-version: 1.2.0
+message: "If you use this benchmark, its data or its methodology, please cite the thesis."
+title: "Análise Comparativa de SGBDV: Benchmark Experimental entre Qdrant, pgvector e ChromaDB"
+type: software
+authors:
+  - family-names: Caneira
+    given-names: Francisco
+repository-code: "https://github.com/Applied-Intelligence-Hub/qdrant-pgvector-chroma-benchmark"
+license: GPL-3.0
+preferred-citation:
+  type: thesis
+  title: "Análise Comparativa de SGBDV: Benchmark Experimental entre Qdrant, pgvector e ChromaDB"
+  authors:
+    - family-names: Caneira
+      given-names: Francisco
+  institution:
+    name: "Instituto Politécnico de Santarém"
+  year: 2026
+  thesis-type: "Master's thesis"
