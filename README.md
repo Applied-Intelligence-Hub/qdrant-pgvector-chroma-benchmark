@@ -12,10 +12,12 @@ It evaluates the performance, resource efficiency (RAM/Disk), and operational tr
 
 All tests are conducted using the **SIFT1M dataset** (1 million vectors, 128 dimensions) and the **HNSW algorithm** with the same parameters in the three engines (`m=16`, `ef_construction=200`, `ef_search=64`), evaluated across both **L2 Distance** and **Cosine Similarity**.
 
-Every number in this thesis comes from a CSV file in `results/`, produced by a script in `scripts/`. Script names, comments and terminal messages are in Portuguese, the language of the thesis.
+Every number in the thesis comes from a CSV file in `results/`, produced by a script in `scripts/`. Script names, comments and terminal messages are in Portuguese, the language of the thesis.
 
 ## Key Findings
 Results at the 1M-vector scale, for each metric (Tables 4.23 and 4.24 of the thesis). The best value of each row is in bold.
+
+**L2 metric**
 
 | | Qdrant | ChromaDB | pgvector |
 |---|---:|---:|---:|
@@ -47,7 +49,7 @@ Results at the 1M-vector scale, for each metric (Tables 4.23 and 4.24 of the the
 | RAM: increase at the end of indexing (MB) | 1,236 | 1,041 | **197** ¹ |
 | Disk usage without WAL (MiB) | **463.3** | 795.5 | 1,361.8 |
 | Cold start: container start to first answer (s) | 5.82 | 4.70 | **0.88** |
-| Cold start: extra time over the 1,000 queries (s) | **0.02** | 5.12
+| Cold start: extra time over the 1,000 queries (s) | **0.02** | 5.12 | 10.85 |
 
 Medians of 10 replicas for the base benchmark (time until searchable, latency, recall and sequential throughput) and the cold start, and of 3 replicas for batch insertion and concurrency; one run for RAM profiling and disk usage (disk usage of Qdrant: three runs, the last one reported). The latency rows come from the base benchmark; the detailed latency experiment (5 replicas, Section 4.1.2) is not summarised here, because its higher p95 for Qdrant reflects a behaviour of the `qdrant-client` library, discussed in the thesis. MB and GB are binary units (2^20 and 2^30 bytes), as in the thesis. The choice of metric does not change the ranking of the engines in any row.
 
@@ -64,8 +66,8 @@ To reproduce these experiments in isolated environments (as designed in the thes
 * **OS:** Linux (Ubuntu Server 24.04 LTS recommended)
 * **Docker Engine:** `docker-ce 29.3.0` or equivalent (with `cgroups v2` support for resource limiting)
 * **Python:** Version 3.12+
-* **Hardware:** It was used an Intel Core i5-7400 (4 physical CPU cores) with 16GB of RAM. Each container is limited to a quota of 4 CPUs (`cpus: 4`) and 8 Gib of RAM without swap (`mem_limit` and `memswap_limit`). The benchmark client runs on the same host and shares its cores
-*  **CPU governor:** All final experiments used the `performance` governor (this setting is lost on reboot):
+* **Hardware:** The thesis used an Intel Core i5-7400 (4 physical CPU cores) with 16 GiB of RAM. Each container is limited to a quota of 4 CPUs (`cpus: 4`) and 8 GiB of RAM without swap (`mem_limit` and `memswap_limit`). The benchmark client runs on the same host and shares its cores
+* **CPU governor:** All final experiments used the `performance` governor (this setting is lost on reboot):
   ```bash
   echo performance | sudo tee /sys/devices/system/cpu/cpu*/cpufreq/scaling_governor
   ```
@@ -113,7 +115,7 @@ docker compose -f docker/pgvector-compose.yml up -d
 docker compose -f docker/chromadb-compose.yml up -d
 ```
 
-Starting the files from the `docker/` folder creates the volumes `docker_qdrant_data`, `docker_pgvector_data` and `docker_chromadb_data` (Docker Compose names volumes `<folder>_<volume>`). These are the names used by `monitorizar_ram.py` and by the commands below; if you start the containers from another folder, check the names with `docker volume ls`.
+Docker Compose names each volume `<folder>_<volume>`, after the folder contains the compose files, so these commands creates the volumes `docker_qdrant_data`, `docker_pgvector_data` and `docker_chromadb_data` (Docker Compose names volumes `<folder>_<volume>`). These are the names used by `monitorizar_ram.py` and by the commands below; if you start the containers from another folder, check the names with `docker volume ls`.
 
 Check that the services are running and that the limits are applied:
 
@@ -125,7 +127,6 @@ docker inspect chromadb | grep -i memory
 ```
 
 ### 3. Install Python Dependencies
-Set up your virtual environment and install the required official clients and analysis libraries (e.g., `qdrant-client`, `psycopg2`, `chromadb`, `scipy`, `pandas`):
 
 ```bash
 sudo apt install python3-venv python3-full -y
@@ -135,13 +136,6 @@ pip install --upgrade pip
 pip install -r requirements.txt
 ```
 This installs the official clients and analysis libraries (`qdrant-client`, `psycopg2`, `pgvector`, `chromadb`, `numpy`, `scipy`, `docker`, `tqdm`).
-### 4. Download the Dataset
-You need to download the **SIFT1M dataset** and place it in the `data/` directory.
-
-```bash
-mkdir data
-# Download SIFT1M base vectors, query vectors, and ground truth files here
-```
 
 ### 4. Download and Prepare the SIFT1M Dataset
 Download the dataset from the [INRIA TEXMEX corpus](http://corpus-texmex.irisa.fr/) and prepare it with four scripts, run in this order:
@@ -191,8 +185,8 @@ sync; sudo sh -c 'echo 3 > /proc/sys/vm/drop_caches'
 python3 scripts/monitorizar_ram.py --container qdrant --output ram_qdrant_l2.csv --clean \
         --cmd "python3 scripts/ram_inserir_qdrant.py --metric l2"
 ```
-Repeat for `pgvector` and `chromadb`, and for `--metric cosine`. The insertion scripts also create the `disk_test_<metric>` collections used by Steps 4, 7 and 8.
 
+Repeat for `pgvector` and `chromadb`, and for `--metric cosine`. The insertion scripts also create the `disk_test_<metric>` collections used by Steps 4, 7 and 8.
 
 ### Step 2: Base Performance Benchmarking
 These scripts execute 10 replicas at five scales (100 to 1M vectors), with 10,000 queries per scale, measuring indexing time, latency (p50, p95, p99), throughput (QPS), RAM and Recall@10. Each replica restarts the container.
@@ -206,7 +200,7 @@ python3 scripts/benchmark_base_chromadb.py --metric l2
 In Qdrant, indexing is disabled during the upload and enabled afterwards with a 1 KB threshold, so that the HNSW index is built at every scale (with the default 20,000 KB threshold, collections of up to 100,000 vectors are searched exhaustively).
 
 ### Step 3: Parameter Optimization
-To map the efficiency surfaces and find the Pareto optimal configurations for `m`  ∈ {16, 24, 32} and `ef_search` ∈ {64, 128, 256} (maintaining `ef_construction=200`). Each configuration is measured once, with 1,000 queries.
+To map the efficiency surfaces and find the Pareto optimal configurations for `m` ∈ {16, 24, 32} and `ef_search` ∈ {64, 128, 256} (maintaining `ef_construction=200`). Each configuration is measured once, with 1,000 queries.
 
 ```bash
 python3 scripts/otimizacao_qdrant.py --metric l2
@@ -248,6 +242,8 @@ Figures 2.1 (exact vs. approximate search) and 2.3 (Euclidean distance and cosin
 python3 scripts/gerar_figura_pesquisa.py
 python3 scripts/gerar_figura_metricas.py
 ```
+## Limitations and Notes
+
 ### Limitations of the results
 These limitations are discussed in Section 5.5 of the thesis. They define the conditions under which the results above are valid.
 
@@ -276,11 +272,11 @@ Issues found while running the experiments, which affect anyone repeating them:
 
 ## Repository Structure
 
-* `docker/`: Docker Compose files ensuring hardware parity (4 CPUs, 8GB RAM).
+* `docker/`: Docker Compose files ensuring hardware parity (4 CPUs, 8 GiB RAM).
 * `scripts/`: All Python scripts (dataset preparation, ingestion, benchmarking, profiling, diagnostics, analysis and figures).
 * `results/`: Final CSV files, one folder per experiment (`benchmark_base`, `latency`, `ram_profiling`, `optimization`, `batch_insertion`, `cold_warm`, `disk`, `concurrency`). [`results/README.md`](results/README.md) explains every column and the thesis table or figure each file is used in.
-* `figures/`: Latex code of the Chapter 4 figures, generated from `results/`.
-* `docs/`: Dataset preparation notes and architecture diagrams.
+* `figures/`: LaTeX code of the Chapter 4 figures, generated from `results/`.
+* `docs/`: Dataset preparation notes and the architecture diagrams.
 
 ## Citation
 If you use this benchmark data or methodology in your research, please refer to the original thesis:
