@@ -1,6 +1,6 @@
 # Results: data dictionary
 
-**English** | [Português](results_README.pt.md)
+**English** | [Português](README.pt.md)
 
 Final CSV files of the thesis, one folder per experiment. Every value in Chapter 4 comes from these files.
 File and column names are in Portuguese or English, as written by the scripts; this page explains each column and its unit.
