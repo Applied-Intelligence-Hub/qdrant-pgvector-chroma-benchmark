@@ -115,7 +115,7 @@ docker compose -f docker/pgvector-compose.yml up -d
 docker compose -f docker/chromadb-compose.yml up -d
 ```
 
-Docker Compose names each volume `<folder>_<volume>`, after the folder contains the compose files, so these commands creates the volumes `docker_qdrant_data`, `docker_pgvector_data` and `docker_chromadb_data` (Docker Compose names volumes `<folder>_<volume>`). These are the names used by `monitorizar_ram.py` and by the commands below; if you start the containers from another folder, check the names with `docker volume ls`.
+Docker Compose names each volume `<folder>_<volume>`, after the folder that contains the compose files, so these commands create the volumes `docker_qdrant_data`, `docker_pgvector_data` and `docker_chromadb_data`. These are the names used by `monitorizar_ram.py` and by the commands below. If you move the compose files to another folder, check the names with `docker volume ls`.
 
 Check that the services are running and that the limits are applied:
 
@@ -276,7 +276,7 @@ Issues found while running the experiments, which affect anyone repeating them:
 * `scripts/`: All Python scripts (dataset preparation, ingestion, benchmarking, profiling, diagnostics, analysis and figures).
 * `results/`: Final CSV files, one folder per experiment (`benchmark_base`, `latency`, `ram_profiling`, `optimization`, `batch_insertion`, `cold_warm`, `disk`, `concurrency`). [`results/README.md`](results/README.md) explains every column and the thesis table or figure each file is used in.
 * `figures/`: LaTeX code of the Chapter 4 figures, generated from `results/`.
-* `docs/`: Dataset preparation notes and the architecture diagrams.
+* `docs/`: Dataset preparation notes and the architecture diagram.
 
 ## Citation
 If you use this benchmark data or methodology in your research, please refer to the original thesis:
