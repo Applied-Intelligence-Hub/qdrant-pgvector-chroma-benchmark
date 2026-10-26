@@ -49,7 +49,7 @@ Results at the 1M-vector scale, for each metric (Tables 4.23 and 4.24 of the the
 | Cold start: container start to first answer (s) | 5.82 | 4.70 | **0.88** |
 | Cold start: extra time over the 1,000 queries (s) | **0.02** | 5.12
 
-Medians of 10 replicas for the base benchmark (time until searchable, latency, recall and sequential throughput) and the cold start, and of 3 replicas for batch insertion and concurrency; one run for RAM profiling and disk usage (disk usage of Qdrant: three runs, the last one reported). The latency rows come from the base benchmark; the detailed latency experiment (5 replicas, Section 4.1.2) is not summarised here, because its higher p95 for Qdrant reflects a behaviour of the ´qdrant-client´ library, discussed in the thesis. MB and GB are binary units (2^20 and 2^30 bytes), as in the thesis. The choice of metric does not change the ranking of the engines in any row.
+Medians of 10 replicas for the base benchmark (time until searchable, latency, recall and sequential throughput) and the cold start, and of 3 replicas for batch insertion and concurrency; one run for RAM profiling and disk usage (disk usage of Qdrant: three runs, the last one reported). The latency rows come from the base benchmark; the detailed latency experiment (5 replicas, Section 4.1.2) is not summarised here, because its higher p95 for Qdrant reflects a behaviour of the `qdrant-client` library, discussed in the thesis. MB and GB are binary units (2^20 and 2^30 bytes), as in the thesis. The choice of metric does not change the ranking of the engines in any row.
 
 ¹ pgvector serves queries from the operating system's page cache, which this measurement excludes: the value is the memory the process keeps, not the memory it needs to serve queries.
 
