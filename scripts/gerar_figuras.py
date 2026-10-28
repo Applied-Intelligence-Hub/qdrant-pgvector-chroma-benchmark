@@ -134,8 +134,8 @@ def fig_ram(dados, saida):
 
     escrever(saida, "fig_profiling_memoria", r"""\begin{figure}[H]
 \centering
-""" + painel("l2", "(a) Métrica L2", "Consumo de RAM (MB)") + "%\n\\hfill\n" + painel("cosine", "(b) Similaridade de Cosseno", "") + r"""
-\caption{Evolução do consumo de RAM de cada contentor durante a inserção de 1\,000\,000 de vetores e a construção do índice HNSW. Cada série começa com o contentor acabado de reiniciar e termina quando o índice está construído. Valores absolutos medidos pelo \texttt{docker stats}.}
+""" + painel("l2", "(a) Métrica L2", "Consumo de RAM (MiB)") + "%\n\\hfill\n" + painel("cosine", "(b) Similaridade de Cosseno", "") + r"""
+\caption{Evolução do consumo de RAM de cada contentor durante a inserção de 1\,000\,000 de vetores e a construção do índice HNSW. Cada série começa com o contentor acabado de reiniciar e termina quando o índice está construído. Valores absolutos medidos pelo \texttt{docker stats}. A figura mostra um subconjunto das leituras (cerca de uma a cada 20~s, incluindo o pico); as tabelas usam todas as leituras.}
 \label{fig:profiling_memoria}
 \end{figure}
 """)
@@ -219,7 +219,7 @@ def fig_lote(dados, saida):
 ]
 """ + plots + r"""\end{axis}
 \end{tikzpicture}
-\caption{Débito de inserção em lote para a """ + titulo + r""", medido até a coleção estar pronta a pesquisar (mediana de 3 réplicas). Nos lotes acima de \num{10000} (Qdrant) e de \num{5461} (ChromaDB), os vetores são enviados em pedidos de tamanho máximo.}
+\caption{Débito de inserção em lote para a """ + titulo + r""", medido até a coleção estar pronta a pesquisar (mediana de 3 réplicas). Nos lotes acima de \num{10000} (Qdrant, limite definido no script) e de \num{5461} (ChromaDB, limite indicado pelo servidor), os vetores são enviados em pedidos desse tamanho.}
 \label{fig:batch_throughput_""" + met + r"""}
 \end{figure}
 """)
