@@ -32,6 +32,6 @@
 \addlegendentry{pgvector}
 \end{axis}
 \end{tikzpicture}
-\caption{Débito de inserção em lote para a \textbf{Métrica L2}, medido até a coleção estar pronta a pesquisar (mediana de 3 réplicas). Nos lotes acima de \num{10000} (Qdrant) e de \num{5461} (ChromaDB), os vetores são enviados em pedidos de tamanho máximo.}
+\caption{Débito de inserção em lote para a \textbf{Métrica L2}, medido até a coleção estar pronta a pesquisar (mediana de 3 réplicas). Nos lotes acima de \num{10000} (Qdrant, limite definido no script) e de \num{5461} (ChromaDB, limite indicado pelo servidor), os vetores são enviados em pedidos desse tamanho.}
 \label{fig:batch_throughput_l2}
 \end{figure}

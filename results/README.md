@@ -6,7 +6,7 @@ Final CSV files of the thesis, one folder per experiment. Every value in Chapter
 File and column names are in Portuguese or English, as written by the scripts; this page explains each column and its unit.
 
 Conventions: `<engine>` is `qdrant`, `chromadb` or `pgvector`; `<metric>` is `l2` or `cosine` (`L2` or `Cosine` in some file names).
-MB and GB are binary units (2^20 and 2^30 bytes); MiB is used for disk sizes. Decimal separator: point.
+Column names use MB and GB, as written by the scripts; they are binary units (2^20 and 2^30 bytes), which the thesis reports as MiB and GiB. Decimal separator: point.
 
 ---
 
@@ -15,7 +15,7 @@ MB and GB are binary units (2^20 and 2^30 bytes); MiB is used for disk sizes. De
 | File | Produced by | Used in |
 |---|---|---|
 | `results_<engine>_<metric>.csv` | `benchmark_base_<engine>.py` | Source of the medians and tests below |
-| `medianas_base_<metric>.csv` | `analise_estatistica.py` | Tables 4.1 and 4.2; synthesis Tables 4.23 and 4.24 |
+| `medianas_base_<metric>.csv` | `analise_estatistica.py` | Tables 4.1 and 4.2; synthesis Tables 4.24 and 4.25 |
 | `testes_base.csv` | `analise_estatistica.py` | Tables 4.3 and 4.4 |
 
 **`results_<engine>_<metric>.csv`** — one row per replica (10) and scale (100 to 1,000,000 vectors):
@@ -27,9 +27,9 @@ MB and GB are binary units (2^20 and 2^30 bytes); MiB is used for disk sizes. De
 | `Ingest_Time_s` | Time to send the vectors | s |
 | `Index_Build_s` | Time to build the HNSW index after the insertion (empty in ChromaDB, which updates the index during insertion) | s |
 | `Ready_Time_s` | Time until the collection is searchable (insertion + index) | s |
-| `RAM_Baseline_GB` | Container memory at idle, before the insertion | GB |
-| `RAM_Build_Peak_GB` | Peak memory during insertion and index build, above idle | GB |
-| `RAM_Query_Avg_GB` | Mean memory during the queries, above idle | GB |
+| `RAM_Baseline_GB` | Container memory at idle, before the insertion | GiB |
+| `RAM_Build_Peak_GB` | Peak memory during insertion and index build, above idle | GiB |
+| `RAM_Query_Avg_GB` | Mean memory during the queries, above idle | GiB |
 | `p50_ms`, `p95_ms`, `p99_ms` | Latency percentiles of the 10,000 queries | ms |
 | `QPS` | Sequential throughput | queries/s |
 | `Recall@10` | Fraction of the 10 true neighbours returned | 0–1 |
@@ -84,7 +84,7 @@ Columns: `Tempo_Segundos` (time since the start of the recording, s) and `RAM_MB
 
 | File | Produced by | Used in |
 |---|---|---|
-| `resultados_otimizacao_<engine>_<Metric>.csv` | `otimizacao_<engine>.py` | Tables 4.11 and 4.12, Figure 4.4 |
+| `resultados_otimizacao_<engine>_<Metric>.csv` | `otimizacao_<engine>.py` | Tables 4.11 and 4.12, Figure 4.4; recall-matched comparison, Table 4.13 |
 
 | Column | Meaning | Unit |
 |---|---|---|
@@ -92,10 +92,10 @@ Columns: `Tempo_Segundos` (time since the start of the recording, s) and `RAM_MB
 | `m`, `ef_search` | HNSW parameters tested (`ef_construction` = 200) | — |
 | `Recall_10` | Recall@10 over 1,000 queries | % |
 | `p50_ms` | Median latency over the same queries | ms |
-| `Total_GB` | Total container memory | GB |
-| `Anon_GB` | Anonymous memory (allocated by the process) | GB |
-| `File_GB` | File cache charged to the container | GB |
-| `Shmem_GB` | Shared memory (PostgreSQL `shared_buffers`) | GB |
+| `Total_GB` | Total container memory | GiB |
+| `Anon_GB` | Anonymous memory (allocated by the process) | GiB |
+| `File_GB` | File cache charged to the container | GiB |
+| `Shmem_GB` | Shared memory (PostgreSQL `shared_buffers`) | GiB |
 
 The "own memory" in the thesis tables is `Anon_GB` (plus `Shmem_GB` for pgvector).
 
@@ -105,7 +105,7 @@ The "own memory" in the thesis tables is `Anon_GB` (plus `Shmem_GB` for pgvector
 
 | File | Produced by | Used in |
 |---|---|---|
-| `resultados_batch_<engine>_<Metric>.csv` | `lote_inserir_<engine>.py` | Tables 4.13 and 4.14, Figures 4.5 and 4.6 |
+| `resultados_batch_<engine>_<Metric>.csv` | `lote_inserir_<engine>.py` | Tables 4.14 and 4.15, Figures 4.5 and 4.6 |
 | `diagnostico_serializacao_pgvector.csv` | `diagnostico_serializacao_pgvector.py` | Text of Section 4.1.5 |
 
 **`resultados_batch_*.csv`** — one row per batch size and replica (3):
@@ -129,7 +129,7 @@ The "own memory" in the thesis tables is `Anon_GB` (plus `Shmem_GB` for pgvector
 
 | File | Produced by | Used in |
 |---|---|---|
-| `resultados_cold_warm_<engine>_<Metric>.csv` | `arranque_frio_<engine>.py` | Tables 4.15 and 4.16; synthesis Tables 4.23 and 4.24 |
+| `resultados_cold_warm_<engine>_<Metric>.csv` | `arranque_frio_<engine>.py` | Tables 4.16 and 4.17; synthesis Tables 4.24 and 4.25 |
 
 One row per replica (10):
 
@@ -150,7 +150,7 @@ The synthesis tables report "container start to first answer" as the median, ove
 
 | File | Produced by | Used in |
 |---|---|---|
-| `disk_<engine>_<metric>.csv` | `disco_<engine>.py` | Tables 4.17 and 4.18, Figures 4.7 and 4.8 |
+| `disk_<engine>_<metric>.csv` | `disco_<engine>.py` | Tables 4.18 and 4.19, Figures 4.7 and 4.8 |
 | `disk_chromadb_ficheiros_indice_<metric>.csv` | `disco_chromadb.py` | Split of the ChromaDB index in Figures 4.7 and 4.8 |
 
 All sizes in MiB.
@@ -169,9 +169,9 @@ All sizes in MiB.
 
 | File | Produced by | Used in |
 |---|---|---|
-| `resultados_concorrencia_<engine>_<metric>.csv` | `escalabilidade_<engine>.py` | Tables 4.20 and 4.21, Figures 4.9 and 4.10; synthesis Tables 4.23 and 4.24 |
-| `resultados_concorrencia_chromadb_http_<metric>.csv` | `escalabilidade_chromadb_http.py` | Table 4.22 |
-| `diagnostico_concorrencia.csv` | `diagnostico_concorrencia.py` | Table 4.19 |
+| `resultados_concorrencia_<engine>_<metric>.csv` | `escalabilidade_<engine>.py` | Tables 4.21 and 4.22, Figures 4.9 and 4.10; synthesis Tables 4.24 and 4.25 |
+| `resultados_concorrencia_chromadb_http_<metric>.csv` | `escalabilidade_chromadb_http.py` | Table 4.23 |
+| `diagnostico_concorrencia.csv` | `diagnostico_concorrencia.py` | Table 4.20 |
 
 **`resultados_concorrencia_*.csv`** — one row per replica (3) and number of client processes (1, 2, 4, 8, 16, 24, 32): `Replica`, `Processos`, `QPS` (throughput, queries/s), `p50_ms`, `p95_ms`, `p99_ms` (latency percentiles, ms), `Repeticoes` (queries repeated after a connection error) and `Falhas` (queries that failed after 3 attempts).
 

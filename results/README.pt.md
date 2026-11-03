@@ -6,7 +6,7 @@ Ficheiros CSV finais da tese, numa pasta por ensaio. Todos os valores do Capítu
 Os nomes dos ficheiros e das colunas estão em português ou em inglês, tal como os scripts os escrevem; esta página explica cada coluna e a sua unidade.
 
 Convenções: `<motor>` é `qdrant`, `chromadb` ou `pgvector`; `<métrica>` é `l2` ou `cosine` (`L2` ou `Cosine` nalguns nomes de ficheiros).
-MB e GB são unidades binárias (2^20 e 2^30 bytes); os tamanhos em disco estão em MiB. Separador decimal: ponto.
+Os nomes das colunas usam MB e GB, como os scripts os escrevem; são unidades binárias (2^20 e 2^30 bytes), que a tese apresenta como MiB e GiB. Separador decimal: ponto.
 
 ---
 
@@ -15,7 +15,7 @@ MB e GB são unidades binárias (2^20 e 2^30 bytes); os tamanhos em disco estão
 | Ficheiro | Produzido por | Usado em |
 |---|---|---|
 | `results_<motor>_<métrica>.csv` | `benchmark_base_<motor>.py` | Origem das medianas e dos testes abaixo |
-| `medianas_base_<métrica>.csv` | `analise_estatistica.py` | Tabelas 4.1 e 4.2; Tabelas de síntese 4.23 e 4.24 |
+| `medianas_base_<métrica>.csv` | `analise_estatistica.py` | Tabelas 4.1 e 4.2; Tabelas de síntese 4.24 e 4.25 |
 | `testes_base.csv` | `analise_estatistica.py` | Tabelas 4.3 e 4.4 |
 
 **`results_<motor>_<métrica>.csv`** — uma linha por réplica (10) e escala (de 100 a 1 000 000 vetores):
@@ -27,9 +27,9 @@ MB e GB são unidades binárias (2^20 e 2^30 bytes); os tamanhos em disco estão
 | `Ingest_Time_s` | Tempo de envio dos vetores | s |
 | `Index_Build_s` | Tempo de construção do índice HNSW depois da inserção (vazio no ChromaDB, que atualiza o índice durante a inserção) | s |
 | `Ready_Time_s` | Tempo até a coleção estar pronta a pesquisar (inserção + índice) | s |
-| `RAM_Baseline_GB` | Memória do contentor em repouso, antes da inserção | GB |
-| `RAM_Build_Peak_GB` | Pico de memória durante a inserção e a construção do índice, acima do repouso | GB |
-| `RAM_Query_Avg_GB` | Memória média durante as consultas, acima do repouso | GB |
+| `RAM_Baseline_GB` | Memória do contentor em repouso, antes da inserção | GiB |
+| `RAM_Build_Peak_GB` | Pico de memória durante a inserção e a construção do índice, acima do repouso | GiB |
+| `RAM_Query_Avg_GB` | Memória média durante as consultas, acima do repouso | GiB |
 | `p50_ms`, `p95_ms`, `p99_ms` | Percentis da latência das 10 000 consultas | ms |
 | `QPS` | *Throughput* sequencial | consultas/s |
 | `Recall@10` | Fração dos 10 vizinhos verdadeiros devolvidos | 0–1 |
@@ -84,7 +84,7 @@ Colunas: `Tempo_Segundos` (tempo desde o início do registo, s) e `RAM_MB` (mem�
 
 | Ficheiro | Produzido por | Usado em |
 |---|---|---|
-| `resultados_otimizacao_<motor>_<Métrica>.csv` | `otimizacao_<motor>.py` | Tabelas 4.11 e 4.12, Figura 4.4 |
+| `resultados_otimizacao_<motor>_<Métrica>.csv` | `otimizacao_<motor>.py` | Tabelas 4.11 e 4.12, Figura 4.4; comparação com *recall* igualado, Tabela 4.13 |
 
 | Coluna | Significado | Unidade |
 |---|---|---|
@@ -92,10 +92,10 @@ Colunas: `Tempo_Segundos` (tempo desde o início do registo, s) e `RAM_MB` (mem�
 | `m`, `ef_search` | Parâmetros do HNSW testados (`ef_construction` = 200) | — |
 | `Recall_10` | *Recall@10* em 1 000 consultas | % |
 | `p50_ms` | Latência mediana nas mesmas consultas | ms |
-| `Total_GB` | Memória total do contentor | GB |
-| `Anon_GB` | Memória anónima (reservada pelo processo) | GB |
-| `File_GB` | *Cache* de ficheiros atribuída ao contentor | GB |
-| `Shmem_GB` | Memória partilhada (os `shared_buffers` do PostgreSQL) | GB |
+| `Total_GB` | Memória total do contentor | GiB |
+| `Anon_GB` | Memória anónima (reservada pelo processo) | GiB |
+| `File_GB` | *Cache* de ficheiros atribuída ao contentor | GiB |
+| `Shmem_GB` | Memória partilhada (os `shared_buffers` do PostgreSQL) | GiB |
 
 A "memória própria" das tabelas da tese é a `Anon_GB` (mais a `Shmem_GB`, no pgvector).
 
@@ -105,7 +105,7 @@ A "memória própria" das tabelas da tese é a `Anon_GB` (mais a `Shmem_GB`, no 
 
 | Ficheiro | Produzido por | Usado em |
 |---|---|---|
-| `resultados_batch_<motor>_<Métrica>.csv` | `lote_inserir_<motor>.py` | Tabelas 4.13 e 4.14, Figuras 4.5 e 4.6 |
+| `resultados_batch_<motor>_<Métrica>.csv` | `lote_inserir_<motor>.py` | Tabelas 4.14 e 4.15, Figuras 4.5 e 4.6 |
 | `diagnostico_serializacao_pgvector.csv` | `diagnostico_serializacao_pgvector.py` | Texto da Secção 4.1.5 |
 
 **`resultados_batch_*.csv`** — uma linha por tamanho de lote e réplica (3):
@@ -129,7 +129,7 @@ A "memória própria" das tabelas da tese é a `Anon_GB` (mais a `Shmem_GB`, no 
 
 | Ficheiro | Produzido por | Usado em |
 |---|---|---|
-| `resultados_cold_warm_<motor>_<Métrica>.csv` | `arranque_frio_<motor>.py` | Tabelas 4.15 e 4.16; Tabelas de síntese 4.23 e 4.24 |
+| `resultados_cold_warm_<motor>_<Métrica>.csv` | `arranque_frio_<motor>.py` | Tabelas 4.16 e 4.17; Tabelas de síntese 4.24 e 4.25 |
 
 Uma linha por réplica (10):
 
@@ -150,7 +150,7 @@ Nas Tabelas de síntese, o "arranque do contentor até à primeira resposta" é 
 
 | Ficheiro | Produzido por | Usado em |
 |---|---|---|
-| `disk_<motor>_<métrica>.csv` | `disco_<motor>.py` | Tabelas 4.17 e 4.18, Figuras 4.7 e 4.8 |
+| `disk_<motor>_<métrica>.csv` | `disco_<motor>.py` | Tabelas 4.18 e 4.19, Figuras 4.7 e 4.8 |
 | `disk_chromadb_ficheiros_indice_<métrica>.csv` | `disco_chromadb.py` | Divisão do índice do ChromaDB nas Figuras 4.7 e 4.8 |
 
 Todos os tamanhos em MiB.
@@ -169,9 +169,9 @@ O `disk_chromadb_ficheiros_indice_*.csv` indica o tamanho em bytes (`Bytes`) de 
 
 | Ficheiro | Produzido por | Usado em |
 |---|---|---|
-| `resultados_concorrencia_<motor>_<métrica>.csv` | `escalabilidade_<motor>.py` | Tabelas 4.20 e 4.21, Figuras 4.9 e 4.10; Tabelas de síntese 4.23 e 4.24 |
-| `resultados_concorrencia_chromadb_http_<métrica>.csv` | `escalabilidade_chromadb_http.py` | Tabela 4.22 |
-| `diagnostico_concorrencia.csv` | `diagnostico_concorrencia.py` | Tabela 4.19 |
+| `resultados_concorrencia_<motor>_<métrica>.csv` | `escalabilidade_<motor>.py` | Tabelas 4.21 e 4.22, Figuras 4.9 e 4.10; Tabelas de síntese 4.24 e 4.25 |
+| `resultados_concorrencia_chromadb_http_<métrica>.csv` | `escalabilidade_chromadb_http.py` | Tabela 4.23 |
+| `diagnostico_concorrencia.csv` | `diagnostico_concorrencia.py` | Tabela 4.20 |
 
 **`resultados_concorrencia_*.csv`** — uma linha por réplica (3) e número de processos cliente (1, 2, 4, 8, 16, 24, 32): `Replica`, `Processos`, `QPS` (*throughput*, consultas/s), `p50_ms`, `p95_ms`, `p99_ms` (percentis da latência, ms), `Repeticoes` (consultas repetidas depois de um erro de ligação) e `Falhas` (consultas que falharam depois de 3 tentativas).
 

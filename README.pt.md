@@ -17,7 +17,7 @@ Todos os ensaios usam o **dataset SIFT1M** (1 milhão de vetores de 128 dimensõ
 Cada valor da tese vem de um ficheiro CSV em `results/`, produzido por um script em `scripts/`.
 
 ## Principais resultados
-Resultados à escala de um milhão de vetores, para cada métrica (Tabelas 4.23 e 4.24 da tese). A negrito, o melhor valor de cada linha.
+Resultados à escala de um milhão de vetores, para cada métrica (Tabelas 4.24 e 4.25 da tese). A negrito, o melhor valor de cada linha.
 
 **Métrica L2**
 
@@ -30,8 +30,8 @@ Resultados à escala de um milhão de vetores, para cada métrica (Tabelas 4.23 
 | *Throughput* sequencial (QPS) | **493** | 398 | 241 |
 | *Throughput* máximo sob concorrência (QPS) | **1 448** | 676 | 533 |
 | Inserção em lote, 100 000 vetores (vec/s) | **5 797** | 4 435 | 3 029 |
-| RAM: acréscimo máximo durante a indexação (MB) | 1 553 | **1 052** | 1 224 |
-| RAM: acréscimo no fim da indexação (MB) | 1 267 | 1 052 | **197** ¹ |
+| RAM: acréscimo máximo durante a indexação (MiB) | 1 553 | **1 052** | 1 224 |
+| RAM: acréscimo no fim da indexação (MiB) | 1 267 | 1 052 | **197** ¹ |
 | Disco sem o WAL (MiB) | **384,9** | 795,5 | 1 361,6 |
 | Arranque a frio: do arranque do contentor à primeira resposta (s) | 5,16 | 4,70 | **0,86** |
 | Arranque a frio: tempo adicional nas 1 000 consultas (s) | **0,02** | 5,08 | 10,88 |
@@ -47,8 +47,8 @@ Resultados à escala de um milhão de vetores, para cada métrica (Tabelas 4.23 
 | *Throughput* sequencial (QPS) | **506** | 385 | 236 |
 | *Throughput* máximo sob concorrência (QPS) | **1 516** | 677 | 529 |
 | Inserção em lote, 100 000 vetores (vec/s) | **5 902** | 4 466 | 2 552 |
-| RAM: acréscimo máximo durante a indexação (MB) | 1 396 | **1 041** | 1 225 |
-| RAM: acréscimo no fim da indexação (MB) | 1 236 | 1 041 | **197** ¹ |
+| RAM: acréscimo máximo durante a indexação (MiB) | 1 396 | **1 041** | 1 225 |
+| RAM: acréscimo no fim da indexação (MiB) | 1 236 | 1 041 | **197** ¹ |
 | Disco sem o WAL (MiB) | **463,3** | 795,5 | 1 361,8 |
 | Arranque a frio: do arranque do contentor à primeira resposta (s) | 5,82 | 4,70 | **0,88** |
 | Arranque a frio: tempo adicional nas 1 000 consultas (s) | **0,02** | 5,12 | 10,85 |
@@ -204,7 +204,7 @@ python3 scripts/benchmark_base_chromadb.py --metric l2
 No Qdrant, a indexação é desativada durante a inserção e ativada no fim com um limiar de 1 KB, para o índice HNSW ser construído em todas as escalas (com o limiar por omissão, de 20 000 KB, as coleções até 100 000 vetores são pesquisadas de forma exaustiva).
 
 ### Passo 3: Otimização paramétrica
-Mapeia as superfícies de eficiência e encontra as configurações ótimas de Pareto para `m` ∈ {16, 24, 32} e `ef_search` ∈ {64, 128, 256} (mantendo `ef_construction=200`). Cada configuração é medida uma vez, com 1 000 consultas.
+Mapeia as superfícies de eficiência e encontra, sob uma restrição de latência, a configuração com maior *recall* para `m` ∈ {16, 24, 32} e `ef_search` ∈ {64, 128, 256} (mantendo `ef_construction=200`). Cada configuração é medida uma vez, com 1 000 consultas.
 
 ```bash
 python3 scripts/otimizacao_qdrant.py --metric l2

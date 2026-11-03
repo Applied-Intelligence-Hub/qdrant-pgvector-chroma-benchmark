@@ -5,7 +5,7 @@
 \begin{tikzpicture}
 \begin{axis}[
     width=\textwidth, height=0.85\textwidth,
-    xlabel={Tempo (s)}, ylabel={Consumo de RAM (MB)},
+    xlabel={Tempo (s)}, ylabel={Consumo de RAM (MiB)},
     xmin=0, xmax=1050, ymin=0, ymax=1700,
     /pgf/number format/1000 sep={\,},
     grid=major, grid style={dashed, gray!25},
@@ -57,6 +57,6 @@
 \end{tikzpicture}
 \caption*{(b) Similaridade de Cosseno}
 \end{minipage}
-\caption{Evolução do consumo de RAM de cada contentor durante a inserção de 1\,000\,000 de vetores e a construção do índice HNSW. Cada série começa com o contentor acabado de reiniciar e termina quando o índice está construído. Valores absolutos medidos pelo \texttt{docker stats}.}
+\caption{Evolução do consumo de RAM de cada contentor durante a inserção de 1\,000\,000 de vetores e a construção do índice HNSW. Cada série começa com o contentor acabado de reiniciar e termina quando o índice está construído. Valores absolutos medidos pelo \texttt{docker stats}. A figura mostra um subconjunto das leituras (cerca de uma a cada 20~s, incluindo o pico); as tabelas usam todas as leituras.}
 \label{fig:profiling_memoria}
 \end{figure}

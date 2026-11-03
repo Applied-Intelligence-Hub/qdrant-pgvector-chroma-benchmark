@@ -303,7 +303,7 @@ def fig_concorrencia(dados, saida):
 \centering
 \begin{tikzpicture}
 \begin{axis}[
-    width=\textwidth, height=0.85\textwidth,
+    width=0.9\textwidth, height=0.8\textwidth,
     xlabel={Processos cliente}, ylabel={\textit{Throughput} (QPS)},
 """ + eixos + r"""    ymin=0,
     /pgf/number format/1000 sep={\,},
@@ -320,7 +320,7 @@ def fig_concorrencia(dados, saida):
 \centering
 \begin{tikzpicture}
 \begin{axis}[
-    width=\textwidth, height=0.85\textwidth,
+    width=0.9\textwidth, height=0.8\textwidth,
     xlabel={Processos cliente}, ylabel={Latência (ms)},
 """ + eixos + r"""    ymode=log, log basis y={10},
     /pgf/number format/1000 sep={\,},

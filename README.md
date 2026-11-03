@@ -17,7 +17,7 @@ All tests are conducted using the **SIFT1M dataset** (1 million vectors, 128 dim
 Every number in the thesis comes from a CSV file in `results/`, produced by a script in `scripts/`. Script names, comments and terminal messages are in Portuguese, the language of the thesis.
 
 ## Key Findings
-Results at the 1M-vector scale, for each metric (Tables 4.23 and 4.24 of the thesis). The best value of each row is in bold.
+Results at the 1M-vector scale, for each metric (Tables 4.24 and 4.25 of the thesis). The best value of each row is in bold.
 
 **L2 metric**
 
@@ -30,8 +30,8 @@ Results at the 1M-vector scale, for each metric (Tables 4.23 and 4.24 of the the
 | Sequential throughput (QPS) | **493** | 398 | 241 |
 | Maximum throughput under concurrency (QPS) | **1,448** | 676 | 533 |
 | Batch insertion, 100,000 vectors (vec/s) | **5,797** | 4,435 | 3,029 |
-| RAM: peak increase during indexing (MB) | 1,553 | **1,052** | 1,224 |
-| RAM: increase at the end of indexing (MB) | 1,267 | 1,052 | **197** ¹ |
+| RAM: peak increase during indexing (MiB) | 1,553 | **1,052** | 1,224 |
+| RAM: increase at the end of indexing (MiB) | 1,267 | 1,052 | **197** ¹ |
 | Disk usage without WAL (MiB) | **384.9** | 795.5 | 1,361.6 |
 | Cold start: container start to first answer (s) | 5.16 | 4.70 | **0.86** |
 | Cold start: extra time over the 1,000 queries (s) | **0.02** | 5.08 | 10.88 |
@@ -47,8 +47,8 @@ Results at the 1M-vector scale, for each metric (Tables 4.23 and 4.24 of the the
 | Sequential throughput (QPS) | **506** | 385 | 236 |
 | Maximum throughput under concurrency (QPS) | **1,516** | 677 | 529 |
 | Batch insertion, 100,000 vectors (vec/s) | **5,902** | 4,466 | 2,552 |
-| RAM: peak increase during indexing (MB) | 1,396 | **1,041** | 1,225 |
-| RAM: increase at the end of indexing (MB) | 1,236 | 1,041 | **197** ¹ |
+| RAM: peak increase during indexing (MiB) | 1,396 | **1,041** | 1,225 |
+| RAM: increase at the end of indexing (MiB) | 1,236 | 1,041 | **197** ¹ |
 | Disk usage without WAL (MiB) | **463.3** | 795.5 | 1,361.8 |
 | Cold start: container start to first answer (s) | 5.82 | 4.70 | **0.88** |
 | Cold start: extra time over the 1,000 queries (s) | **0.02** | 5.12 | 10.85 |
@@ -202,7 +202,7 @@ python3 scripts/benchmark_base_chromadb.py --metric l2
 In Qdrant, indexing is disabled during the upload and enabled afterwards with a 1 KB threshold, so that the HNSW index is built at every scale (with the default 20,000 KB threshold, collections of up to 100,000 vectors are searched exhaustively).
 
 ### Step 3: Parameter Optimization
-To map the efficiency surfaces and find the Pareto optimal configurations for `m` ∈ {16, 24, 32} and `ef_search` ∈ {64, 128, 256} (maintaining `ef_construction=200`). Each configuration is measured once, with 1,000 queries.
+To map the efficiency surfaces and find, under a latency constraint, the configuration with the highest recall for `m` ∈ {16, 24, 32} and `ef_search` ∈ {64, 128, 256} (maintaining `ef_construction=200`). Each configuration is measured once, with 1,000 queries.
 
 ```bash
 python3 scripts/otimizacao_qdrant.py --metric l2

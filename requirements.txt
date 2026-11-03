@@ -1,13 +1,26 @@
-# Versions used in the final experiments. To pin every package exactly, regenerate this
-# file from the original environment with:  pip freeze > requirements.txt
+# Python libraries used in the dissertation, with the exact versions.
+# Bibliotecas Python usadas na dissertação, com as versões exatas.
+# The scripts run outside the Docker containers (the containers hold only the three engines).
+# Os scripts correm fora dos contentores Docker (os contentores têm apenas os três motores).
+
+# Experiment server / Servidor dos ensaios: Ubuntu Server 24.04, Python 3.12 (pip freeze) 
+
+# Engine clients / Clientes dos motores
 qdrant-client==1.9.2
-httpx==0.28.1
 chromadb==1.5.5
-psycopg2-binary
-pgvector
-numpy
-scipy
-docker
-requests
-matplotlib
-tqdm
+psycopg2-binary==2.9.11
+pgvector==0.4.2
+# Direct HTTP requests / Pedidos HTTP diretos
+requests==2.32.5
+httpx==0.28.1
+# Data, computation and statistical tests / Dados, cálculo e testes estatísticos
+numpy==2.4.2
+scipy==1.17.1
+# Dataset preparation (ground truth) / Preparação do dataset (ground truth)
+tqdm==4.67.3
+# Container control / Controlo dos contentores
+docker==7.1.0
+
+# Personal computer / Computador pessoal (Windows, VS Code): Figures / Figuras 2.1 and/e 2.3
+# gerar_figura_pesquisa.py, gerar_figura_metricas.py
+matplotlib==3.7.5
