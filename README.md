@@ -236,7 +236,7 @@ Once the CSV results are generated, run the statistical analysis script on the b
 python3 scripts/analise_estatistica.py results/benchmark_base   # folder with the six results_*.csv files
 python3 scripts/gerar_figuras.py --dados results --saida figures
 ```
-`gerar_figuras.py` writes the LaTeX (pgfplots) code of the ten figures of Chapter 4, included in the thesis with `\input{figures/<name>.tex}`.
+`gerar_figuras.py` writes the LaTeX (pgfplots) code of the ten figures of Chapter 4, included in the thesis with `\input{figuras/<name>.tex}` (in this repository, they are in `figures/`).
 
 Figures 2.1 (exact vs. approximate search) and 2.3 (Euclidean distance and cosine similarity) are drawn with Matplotlib and saved to `images/`:
 
@@ -247,7 +247,7 @@ python3 scripts/gerar_figura_metricas.py
 ## Limitations and Notes
 
 ### Limitations of the results
-These limitations are discussed in Section 5.5 of the thesis. They define the conditions under which the results above are valid.
+These limitations are discussed in Section 5.6 of the thesis. They define the conditions under which the results above are valid.
 
 * **Scope of the evaluation:** 128-dimensional vectors (SIFT1M), up to 1 million vectors, a single server and read-only workloads. Embeddings from current language models have 768 to 1,536 dimensions, where index size, distance cost and compression behave differently. Distributed deployments and mixed read/write workloads were not evaluated.
 * **pgvector with PostgreSQL's default configuration:** `shared_buffers` is 128 MB, so the table and the index (about 1.3 GiB at 1M vectors) do not fit in PostgreSQL's cache. The results for pgvector (indexing time, latency at 1M vectors and cold start) apply to this configuration and may change with tuning.

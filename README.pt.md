@@ -239,7 +239,7 @@ python3 scripts/analise_estatistica.py results/benchmark_base   # pasta com os s
 python3 scripts/gerar_figuras.py --dados results --saida figures
 ```
 
-O `gerar_figuras.py` escreve o código LaTeX (pgfplots) das dez figuras do Capítulo 4, incluídas na tese com `\input{figures/<nome>.tex}`.
+O `gerar_figuras.py` escreve o código LaTeX (pgfplots) das dez figuras do Capítulo 4, incluídas na tese com `\input{figuras/<nome>.tex}` (neste repositório, estão em `figures/`).
 
 As Figuras 2.1 (pesquisa exata vs. aproximada) e 2.3 (distância euclidiana e similaridade de cosseno) são desenhadas com o Matplotlib e guardadas em `images/`:
 
@@ -251,7 +251,7 @@ python3 scripts/gerar_figura_metricas.py
 ## Limitações e avisos
 
 ### Limitações dos resultados
-Estas limitações são discutidas na Secção 5.5 da tese, e definem as condições em que os resultados acima são válidos.
+Estas limitações são discutidas na Secção 5.6 da tese, e definem as condições em que os resultados acima são válidos.
 
 * **Âmbito da avaliação:** vetores de 128 dimensões (SIFT1M), até um milhão de vetores, um único servidor e cargas só de leitura. Os *embeddings* dos modelos de linguagem atuais têm entre 768 e 1 536 dimensões, onde o tamanho do índice, o custo das distâncias e o efeito da compressão mudam. Não foram avaliadas instalações distribuídas nem cargas mistas de leitura e escrita.
 * **pgvector com a configuração por omissão do PostgreSQL:** os `shared_buffers` são de 128 MB, por isso a tabela e o índice (cerca de 1,3 GiB a um milhão de vetores) não cabem na *cache* do PostgreSQL. Os resultados do pgvector (tempo de indexação, latência a um milhão de vetores e arranque a frio) valem para esta configuração e podem mudar com afinação.
